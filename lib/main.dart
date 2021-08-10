@@ -39,15 +39,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: RefreshIndicator(
-
-        onRefresh: () async{
+        onRefresh: () async {
           setState(() {
             _members.clear();
           });
 
           final url = "https://h5.48.cn/resource/jsonp/allmembers.php?gid=10";
           final res =
-          await http.get(Uri.parse(url)); //因為有get, 所以要用await & async
+              await http.get(Uri.parse(url)); //因為有get, 所以要用await & async
           if (res.statusCode != 200) {
             throw ("error");
           }
@@ -59,6 +58,22 @@ class _MyHomePageState extends State<MyHomePage> {
               id: row["sid"],
               name: row["sname"],
               team: row["tname"],
+              pinyin: row["pinyin"],
+              abbr: row["abbr"],
+              tid: row["tid"],
+              tname: row["tname"],
+              pid: row["pid"],
+              pname: row["pname"],
+              nickname: row["nickname"],
+              company: row["company"],
+              join_day: row["join_day"],
+              height: row["height"],
+              birth_day: row["birth_day"],
+              star_sign_12: row["star_sign_12"],
+              star_sign_48: row["star_sign_48"],
+              birth_place: row["birth_place"],
+              speciality: row["speciality"],
+              hobby: row["hobby"],
             );
           });
           // members.forEach((m)=>print(m));
@@ -66,12 +81,11 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             _members = members.toList();
           });
-
         },
         child: Scrollbar(
           child: CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(),//斷開SliverPersistentHeader和 AppBar
+              const SliverToBoxAdapter(), //斷開SliverPersistentHeader和 AppBar
               SliverPersistentHeader(
                 delegate: _MyDelegate("Team SII", Color(0xff91cdeb)),
                 pinned: true,
@@ -88,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               _buildTeamList("HII"),
               SliverPersistentHeader(
-                delegate: _MyDelegate("Team X",Color(0xffa9cc29) ),
+                delegate: _MyDelegate("Team X", Color(0xffa9cc29)),
                 pinned: true,
               ),
               _buildTeamList("X"),
@@ -112,6 +126,22 @@ class _MyHomePageState extends State<MyHomePage> {
               id: row["sid"],
               name: row["sname"],
               team: row["tname"],
+              pinyin: row["pinyin"],
+              abbr: row["abbr"],
+              tid: row["tid"],
+              tname: row["tname"],
+              pid: row["pid"],
+              pname: row["pname"],
+              nickname: row["nickname"],
+              company: row["company"],
+              join_day: row["join_day"],
+              height: row["height"],
+              birth_day: row["birth_day"],
+              star_sign_12: row["star_sign_12"],
+              star_sign_48: row["star_sign_48"],
+              birth_place: row["birth_place"],
+              speciality: row["speciality"],
+              hobby: row["hobby"],
             );
           });
           // members.forEach((m)=>print(m));
@@ -126,31 +156,45 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-   _buildTeamList(String teamName) {
+  _buildTeamList(String teamName) {
     final teamMembers = _members.where((m) => m.team == teamName).toList();
 
     return SliverGrid(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           final m = teamMembers[index];
-          return Column(
-            children: [
-              ClipOval(
-                child: CircleAvatar(
-                  // child: Text("L"),
-                  child: Image.network(m.avatarUrl),
-                  backgroundColor: Colors.white,
-                  radius: 32,
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => DetailPage(member: m),
                 ),
-              ),
-              Text(m.name),
-            ],
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Hero(
+                  tag: m.avatarUrl,
+                  child: ClipOval(
+                    child: CircleAvatar(
+                      // child: Text("L"),
+                      child: Image.network(m.avatarUrl),
+                      backgroundColor: Colors.white,
+                      radius: 32,
+                    ),
+                  ),
+                ),
+                Text(m.name),
+              ],
+            ),
           );
         },
         childCount: teamMembers.length,
-      ), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 4,
-    ),
+      ),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 120,
+      ),
     );
   }
 }
@@ -190,10 +234,147 @@ class Member {
   final String name;
   final String team;
 
-  Member({required this.id, required this.name, required this.team});
+  final String pinyin;
+  final String abbr;
+  final String tid;
+  final String tname;
+  final String pid;
+  final String pname;
+  final String nickname;
+  final String company;
+  final String join_day;
+  final String height;
+  final String birth_day;
+  final String star_sign_12;
+  final String star_sign_48;
+  final String birth_place;
+  final String speciality;
+  final String hobby;
+
+  Member({
+    required this.id,
+    required this.name,
+    required this.team,
+    required this.pinyin,
+    required this.abbr,
+    required this.tid,
+    required this.tname,
+    required this.pid,
+    required this.pname,
+    required this.nickname,
+    required this.company,
+    required this.join_day,
+    required this.height,
+    required this.birth_day,
+    required this.star_sign_12,
+    required this.star_sign_48,
+    required this.birth_place,
+    required this.speciality,
+    required this.hobby,
+  });
 
   String get avatarUrl => "https://www.snh48.com/images/member/zp_$id.jpg";
 
   @override
   String toString() => "$id: $name";
+}
+
+class DetailPage extends StatelessWidget {
+  final Member member;
+
+  const DetailPage({Key? key, required this.member}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            leading: BackButton(color: Colors.black,),
+            pinned: true,
+            backgroundColor: Colors.pink[50],
+            expandedHeight: 300,
+            stretch: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                "SNH48-${member.name}",
+                style: TextStyle(color: Colors.grey[800]),
+              ),
+              background: Stack(
+                children: [
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Image.network(
+                            "https://img.freepik.com/free-vector/vibrant-pink-watercolor-painting-background_53876-58931.jpg",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Container(height: 2, color: Colors.pink[100],),
+                      Expanded(child: SizedBox()),
+                    ],
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(100.0),
+                      child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Hero(
+                            tag: member.avatarUrl,
+                            child: Material(
+                              shape: CircleBorder(),
+                              elevation: 8.0,
+                              child: ClipOval(
+                                  child: Image.network(
+                                member.avatarUrl,
+                                fit: BoxFit.cover,
+                              )),
+                            ),
+                          )),
+                    ),
+                  ),
+                ],
+              ),
+              collapseMode: CollapseMode.pin,
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                _buildInfo("拼音", member.pinyin),
+                _buildInfo("加入所屬", member.pname),
+                _buildInfo("暱稱", member.nickname),
+                _buildInfo("加入日期", member.join_day),
+                _buildInfo("身高", "${member.height} cm"),
+                _buildInfo("生日", member.birth_day),
+                _buildInfo("星座", member.star_sign_12),
+                _buildInfo("出生地", member.birth_place),
+                _buildInfo("特長", member.speciality),
+                _buildInfo("興趣愛好", member.hobby),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  _buildInfo(String label, String content) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(label),
+            Text(
+              content,
+              textAlign: TextAlign.end,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
